@@ -13,6 +13,7 @@ fi
 
 
 rm -f for_beeminder.md; find . -name "*.e" |  xargs -I {} sh -c 'echo "# Filename: {}"; cat {}; echo'  >> for_beeminder.md
+wc --words for_beeminder.md
 git add for_beeminder.md
 git commit -am "auto generate for_beeminder so that it can count the lines of code."
 git push
