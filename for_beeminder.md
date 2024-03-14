@@ -183,3 +183,58 @@ feature {NONE} -- Initialization
 
 end
 
+# Filename: ./ex_attributes/person.e
+note
+	description: "Summary description for {PERSON}."
+	author: ""
+	date: "$Date$"
+	revision: "$Revision$"
+
+class
+	PERSON
+
+	feature -- access
+		mood: STRING assign set_mood
+			attribute
+				Result := "happy"
+			end
+
+		set_mood(a_string: STRING)
+			require
+				single_token: a_string.occurrences (' ') = 0
+				do
+					mood := a_string
+				ensure
+					mood_was_set: mood = a_string
+				end
+end
+
+# Filename: ./ex_attributes/application.e
+note
+	description: "ex_attributes application root class"
+	date: "$Date$"
+	revision: "$Revision$"
+
+class
+	APPLICATION
+
+inherit
+	ARGUMENTS_32
+
+create
+	make
+
+feature {NONE} -- Initialization
+
+	make
+			-- Run application.
+		do
+			create my_person
+			print("mood with default values" + my_person.mood + "%N")
+			my_person.mood := "Ecstatic"
+			print("mood after assignment" + my_person.mood + "%N")
+		end
+
+	my_person:PERSON
+end
+
