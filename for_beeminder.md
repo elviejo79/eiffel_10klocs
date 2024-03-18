@@ -522,7 +522,7 @@ feature {NONE} -- Initialization
 			elseif size > biggest_one then
 				std_output.put_string("Value too big for this method. %N")
 			else
-				create elem.make(1,max)
+				create elem.make_filled(1,max)
 				if fill_up(1) then
 					std_output.put_string("Full pyramid:%N")
 					print_on(std_output)
@@ -656,10 +656,41 @@ feature {NONE} -- Initialization
 				Result := nb > 0
 			end
 		end
-feature{}
+feature{NONE}
 	elem : ARRAY[INTEGER]
-	case_vide: INTEGER := 0
-	biggest_one:INTEGER := 10
-	
+	case_vide: INTEGER
+	biggest_one:INTEGER
+	indice(lig, col :INTEGER):INTEGER
+		require
+			lig_trop_petit: lig >= 1
+			lig_trop_grand: lig <= size
+			col_trop_petit: col >= 1
+			col_trop_grand: col <= size
+		local
+			l:INTEGER
+		do
+			l := size - lig + 1
+			Result := max - l * (l+1) // 2 + col
+		ensure
+			Result >= 1
+			Result <= max
+		end
+
+	clear_column(col:INTEGER)
+		require
+			col >= 1
+			col <= size
+		local
+			lig:INTEGER
+		do
+			from
+				lig := 1
+			until
+				lig > col
+			loop
+				elem.put(case_vide, indice(lig, col - lig + 1))
+				lig := lig + 1
+			end
+		end
 end
 
