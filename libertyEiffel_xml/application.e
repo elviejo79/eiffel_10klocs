@@ -89,7 +89,30 @@ feature {XML_COMPOSITE_NODE}
 				i := i + 1
 			end
 
+			io.put_character (')')
 		end
+
+		io.put_new_line
+		from
+			start_indent := indent
+			indent := start_indent+1
+			i := 1
+		invariant
+			indent = start_index + 1
+		until
+			i > node.children_count
+		loop
+			node.child(i).accept(Current)
+			i := i + 1
+		end
+
+		indent := start_indent
 	end
 
+error(line,count : INTEGER)
+	do
+		std_error.put_string("Error at ")
+		std_error.put_integer(line)
+		std_error.put_string(",")
+	end
 end
