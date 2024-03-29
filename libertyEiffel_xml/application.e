@@ -6,11 +6,9 @@ note
 class
 	APPLICATION
 
-insert
-	ARGUMENTS
-
 inherit
 	XML_NODE_VISITOR
+	ARGUMENTS
 
 create
 	make
@@ -33,7 +31,7 @@ feature {NONE} -- Initialization
 			if (in.is_connected) then
 				create tree.with_error_handler(in.url, agent error(?,?))
 
-				version := tree.attribute_at(U"vesion")
+				version := tree.attribute_at("vesion")
 				if version /= Void then
 					io.put_string ("XML version:")
 					io.put_string (version.as_utf8)
@@ -114,5 +112,8 @@ error(line,count : INTEGER)
 		std_error.put_string("Error at ")
 		std_error.put_integer(line)
 		std_error.put_string(",")
+		std_error.put_integer(column)
+		std_error.put_string( "!%N")
+		die_with_code(1)
 	end
 end
