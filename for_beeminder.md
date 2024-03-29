@@ -373,6 +373,150 @@ feature {NONE} -- Initialization
 
 end
 
+# Filename: ./libertyEiffel_xml/my_validating_tree.e
+note
+	description: "Summary description for {MY_VALIDATING_TREE}."
+	author: ""
+	date: "$Date$"
+	revision: "$Revision$"
+
+class
+	MY_VALIDATING_TREE
+
+inherit
+	XML_TREE
+	redefine new_node
+	end
+
+create {EXAMPLE2}
+	with_error_handler
+
+feature {NONE} -- Initialization
+
+	Tree_tag:UNICODE_STRING
+		once
+			Result := "Tree"
+		end
+	Node_tag: UNICODE_STRING
+		once
+			Result := "node"
+		end
+
+	Leaf_tag: UNICODE_STRING
+		once
+			Result := "leaf"
+		end
+
+	new_node(node_name:UNICODE_STRING; line, column: INTEGER): XML_COMPOSITE_NODE
+		do
+			inspect
+				node_name.as_utf8
+			when ("tree") then
+				if current_node /= void then
+					parse_error(line, column, "unexpected node without a parent node")
+				else
+					create Result.make(Tree_tag, line, column)
+				end
+			when "node" then
+				if current_node = Void or else current_node = Leaf_tag then
+					parse_error(line, column, "unexpected node without parent node or with parent being a node leaf")
+				else
+					create Result.make(Node_tag, line, column)
+				end
+			when "leaf" then
+				if current_node = Void then
+					parse_error(line,column,"unexpected leaf without parent node")
+				else
+					create Result.make(Leaf_tag, line, column)
+				end
+			end
+		end
+end
+
+# Filename: ./libertyEiffel_xml/example2.e
+note
+	description: "Summary description for {EXAMPLE2}."
+	author: ""
+	date: "$Date$"
+	revision: "$Revision$"
+
+class
+	EXAMPLE2
+
+inherit
+	APPLICATION
+	redefine make
+	end
+
+create
+	make
+
+feature {NONE} -- Initialization
+
+	make
+		local
+			in: TEXT_FILE_READ;
+			tree: MY_VALIDATING_TREE;
+			version: UNICODE_STRING
+		do
+			if argument_count = 0 then
+				std_error.put_line("Usage: #(1) <file.xml>")
+				die_with_code(1)
+			end
+
+			-- first create the stream
+			create in.connect_to(argument(1))
+			if in.is_connected then
+				create tree.with_error_handler(in.url, agent(error(?,?))
+
+				version := tree.attribute_at("version")
+				if version /= void then
+					io.put_string("XML version")
+					io.put_string(version.as_utf8)
+					io.put_new_line
+				end
+
+				tree.root.accept(Current)
+			end
+		end
+
+feature -- Access
+
+feature -- Measurement
+
+feature -- Status report
+
+feature -- Status setting
+
+feature -- Cursor movement
+
+feature -- Element change
+
+feature -- Removal
+
+feature -- Resizing
+
+feature -- Transformation
+
+feature -- Conversion
+
+feature -- Duplication
+
+feature -- Miscellaneous
+
+feature -- Basic operations
+
+feature -- Obsolete
+
+feature -- Inapplicable
+
+feature {NONE} -- Implementation
+
+invariant
+	invariant_clause: True -- Your invariant here
+
+end
+
 # Filename: ./libertyEiffel_xml/application.e
 note
 	description: "libertyEiffel_xml application root class"
@@ -382,11 +526,9 @@ note
 class
 	APPLICATION
 
-insert
-	ARGUMENTS
-
 inherit
 	XML_NODE_VISITOR
+	ARGUMENTS
 
 create
 	make
@@ -409,7 +551,7 @@ feature {NONE} -- Initialization
 			if (in.is_connected) then
 				create tree.with_error_handler(in.url, agent error(?,?))
 
-				version := tree.attribute_at(U"vesion")
+				version := tree.attribute_at("vesion")
 				if version /= Void then
 					io.put_string ("XML version:")
 					io.put_string (version.as_utf8)
@@ -490,6 +632,9 @@ error(line,count : INTEGER)
 		std_error.put_string("Error at ")
 		std_error.put_integer(line)
 		std_error.put_string(",")
+		std_error.put_integer(column)
+		std_error.put_string( "!%N")
+		die_with_code(1)
 	end
 end
 
