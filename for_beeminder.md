@@ -250,7 +250,7 @@ end
 	revision: "$Revision$"
 
 deferred class
-	STS_SET [ELEMENT, EQ->EQUALITY[A]]
+	STS_SET [ELEMENT, EQ->EQUALITY[ELEMENT]]
 
 --inherit
 --	ELEMENT
@@ -297,6 +297,64 @@ feature -- Membership
 			definition: Result = (Current |∃ agent equality_holds (e, ?))
 		end
 
+	is_in alias "∈" (s:SET [ SET [ELEMENT,EQ], EQUALITY [SET [ELEMENT,EQ]]]):BOOLEAN
+		-- Does `s' have a current set?
+		do
+			Result := s ∋ Current
+		ensure
+			definition: Result = s ∋ Current
+		end
+
+	is_not_in alias "∉" (s: SET [SET[ELEMENT,EQ], EQUALITY[SET[ELEMENT,EQ]]]):BOOLEAN
+		do
+			Result := not (Current ∈ s)
+		ensure
+			definition: Result = not (Current ∈ s)
+		end
+
+	does_not_have alias "∌" (e:ELEMENT):BOOLEAN
+		do
+			Result := not (Current ∋ e)
+		ensure
+			definition: Resul = not (Current ∋ e)
+		end
+
+feature -- Construction
+	with alias "&" (e:ELEMENT): like superset_anchor
+	deferred
+	ensure
+		with_appended_element: Result ∋ e
+		nothing_lost: Current |∀ agent Result.has
+		nothing_added: Result |∀ agent ored(agent has, agent equality_holds(e,?),?)
+	end
+
+	without alias "/" (e:ELEMENT): like subset_anchor
+		-- Every element in current set except A
+		deferred
+		ensure
+			does_not_have_element: Result ∌ e
+			nothing_lost: Current |∀ agent xored (agent Result.has, agent equality_holds(e,?),?)
+			nothing_modified: Result |∀ agent has
+		end
+feature -- Quantifiers
+	exists alias "|∃" (p:PREDICATE[ELEMENT]): BOOLEAN
+		do
+			Result := transformer_to_boolean.set_reduction(Current, False, agent cumulative_disjunction(?,p,?))
+		ensure
+			definition: Result = transformer_to_boolean.set_reduction(Current, False, agent cumulative_disjunction(?, p, ?))
+		end
+	for_all alias "|∀" (p:PREDICATE [ELEMENT]): BOOLEAN
+		do
+			Result := transformer_to_boolean.set_reduction(Current, True, agent cumulative_conjuction(?,p,?))
+		ensure
+			definition: Result = transformer_to_boolean.set_reduction(Current, True, agent cumulative_conjuction(?,p,?))
+		end
+
+feature -- transformers
+	transformer_to_boolean: TRANSFORMER[ELEMENT, BOOLEAN, OBJECT_EQUALITY[BOOLEAN]]
+				-- Transformer of objects whose types derive from {A} to objects whose types derive from {BOOLEAN}
+		deferred
+		end
 end
 
 # Filename: ./ex_sieve/application.e
