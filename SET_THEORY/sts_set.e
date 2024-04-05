@@ -91,6 +91,22 @@ feature -- Construction
 			nothing_lost: Current |∀ agent xored (agent Result.has, agent equality_holds(e,?),?)
 			nothing_modified: Result |∀ agent has
 		end
+feature -- Quality
+	is_singleton:BOOLEAN
+		do
+			Result := not is_empty and others.is_empty
+		ensure
+			definition: Result = (not is_empty and others.is_empty)
+		end
+
+feature -- Measurement
+	cardinality alias "#":like natural_anchor
+		do
+			Result := transformer_to_natural.set_reduction (Current, 0, agent cumulative_succesor)
+		ensure
+			definition: Result = transformer_to_natural.set_reduction (Current, 0, agent cumulative_succesor)
+		end
+
 feature -- Quantifiers
 	exists alias "|∃" (p:PREDICATE[ELEMENT]): BOOLEAN
 		do
@@ -105,9 +121,41 @@ feature -- Quantifiers
 			definition: Result = transformer_to_boolean.set_reduction(Current, True, agent cumulative_conjuction(?,p,?))
 		end
 
+
 feature -- transformers
 	transformer_to_boolean: TRANSFORMER[ELEMENT, BOOLEAN, OBJECT_EQUALITY[BOOLEAN]]
 				-- Transformer of objects whose types derive from {A} to objects whose types derive from {BOOLEAN}
 		deferred
 		end
+	transformer_to_natural: TRANSFORMER [ELEMENT, like natural_anchor, OBJECT_EQUALITY [like natural_anchor]]
+			-- Transformer of objects whose types derive from {A} to objects whose types derive from {like natural_anchor}
+		deferred
+		end
+
+feature --Anchor
+	natural_anchor: NATURAL
+			-- Anchor for natural numbers
+			--| TODO: Pull it up to a target-dependant class.
+		do
+		ensure
+			class
+		end
+
+	set_anchor: SET[ELEMENT, EQ]
+		-- Anchor for sets like current one
+		-- TODO: Why didn't we use like Current ?
+		deferred
+		end
+	subset_anchor: SET[ELEMENT, EQ]
+		-- Anchor for subsets of the current SET
+		-- TODO: Again why don't we use like Current, if every subset must be of the same type of elements that the current?
+		deferred
+		end
+
+	superset_anchor: SET[ELEMENT, EQ]
+		--Anchor for the superset
+				-- TODO: Again why don't we use like Current, if every subset must be of the same type of elements that the current?
+		deferred
+		end
+
 end
