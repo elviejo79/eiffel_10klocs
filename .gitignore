@@ -1,3 +1,6 @@
+#ignore all files starting with an underscore to avoid _darcs directory
+_*
+
 # Created by https://www.toptal.com/developers/gitignore/api/emacs,eiffelstudio,vim
 # Edit at https://www.toptal.com/developers/gitignore?templates=emacs,eiffelstudio,vim
 
