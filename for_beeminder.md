@@ -562,6 +562,224 @@ feature {NONE} -- Initialization
 
 end
 
+# Filename: ./componization_patterns/Pag49/application.e
+note
+	description: "thesis application root class"
+	date: "$Date$"
+	revision: "$Revision$"
+
+class
+	APPLICATION
+
+inherit
+	ARGUMENTS_32
+
+create
+	make
+
+feature {NONE} -- Initialization
+
+	make
+			-- Run application.
+		do
+			--| Add your code here
+			print ("Hello Eiffel World!%N")
+		end
+
+end
+
+# Filename: ./componization_patterns/Pag49/book.e
+note
+	description: "Summary description for {BOOK}."
+	author: ""
+	date: "$Date$"
+	revision: "$Revision$"
+
+class
+	BOOK
+
+feature
+	borrowed:BOOLEAN
+	free:BOOLEAN
+
+	borrow
+		do
+			if free then
+				borrowed := true
+				free:= false
+			else
+				-- rais exception is not possible to start borrow if its already borrowed
+			end
+		end
+
+end
+
+# Filename: ./componization_patterns/Pag50/state.e
+note
+	description: "Summary description for {STATE}."
+	author: ""
+	date: "$Date$"
+	revision: "$Revision$"
+
+class
+	STATE
+
+create make
+
+feature
+	make
+	do
+		my_state := "free"
+	end
+
+
+feature
+	my_state:STRING
+
+feature
+	borrow
+	require
+		the_book_is_free: my_state = "free"
+	do
+		my_state := "borrowed"
+	ensure
+		the_book_is_now_borrowed: my_state = "borrowed"
+	end
+
+end
+
+# Filename: ./componization_patterns/Pag50/application.e
+note
+	description: "thesis application root class"
+	date: "$Date$"
+	revision: "$Revision$"
+
+class
+	APPLICATION
+
+inherit
+	ARGUMENTS_32
+
+create
+	make
+
+feature {NONE} -- Initialization
+
+	make
+			-- Run application.
+		do
+			--| Add your code here
+			print ("Hello Eiffel World!%N")
+		end
+
+end
+
+# Filename: ./componization_patterns/Pag50/book.e
+note
+	description: "Summary description for {BOOK}."
+	author: ""
+	date: "$Date$"
+	revision: "$Revision$"
+
+class
+	BOOK
+
+feature
+	borrow
+		do
+			state.borrow
+		end
+
+feature {NONE}
+	state:STATE
+	attribute
+		create Result.make
+	end
+end
+
+# Filename: ./componization_patterns/main/state.e
+note
+	description: "Summary description for {STATE}."
+	author: ""
+	date: "$Date$"
+	revision: "$Revision$"
+
+class
+	STATE
+
+create make
+
+feature
+	make
+	do
+		my_state := "free"
+	end
+
+
+feature
+	my_state:STRING
+
+feature
+	borrow
+	require
+		the_book_is_free: my_state = "free"
+	do
+		my_state := "borrowed"
+	ensure
+		the_book_is_now_borrowed: my_state = "borrowed"
+	end
+
+end
+
+# Filename: ./componization_patterns/main/application.e
+note
+	description: "thesis application root class"
+	date: "$Date$"
+	revision: "$Revision$"
+
+class
+	APPLICATION
+
+inherit
+	ARGUMENTS_32
+
+create
+	make
+
+feature {NONE} -- Initialization
+
+	make
+			-- Run application.
+		do
+			--| Add your code here
+			print ("Hello Eiffel World!%N")
+		end
+
+end
+
+# Filename: ./componization_patterns/main/book.e
+note
+	description: "Summary description for {BOOK}."
+	author: ""
+	date: "$Date$"
+	revision: "$Revision$"
+
+class
+	BOOK
+
+feature
+	borrow
+		do
+			state.borrow
+		end
+
+feature {NONE}
+	state:STATE
+	attribute
+		create Result.make
+	end
+end
+
 # Filename: ./libertyEiffel_xml/my_validating_tree.e
 note
 	description: "Summary description for {MY_VALIDATING_TREE}."
