@@ -183,6 +183,73 @@ feature {NONE} -- Initialization
 
 end
 
+# Filename: ./ArchOrientedProgramming/polymorphicidentifiers/scheme.e
+note
+	description: "Summary description for {SCHEME}."
+	author: "Alejandro Garcia Fernandez"
+	date: "2024-apr-7"
+	revision: "1"
+	examples:"[
+	person
+	name
+	var:person/name
+	var:person/{attribute}
+	file://tmp/button.png
+	htttp://www.example.com/button.pngg
+	file:{env:HOME}/rfcs/{rfcnName}
+	]"
+
+deferred class
+	SCHEME
+
+	create
+		make
+
+	feature --creation
+		make alias ":"
+		deferred
+		end
+
+	feature path_sections:TREE[STRING]
+	feature add_root alias "//" (sever_name:STRING):like Current
+		require
+			server_name_is_valid_url: 
+
+	feature
+		add_to_path alias "/" (identifier:STRING):like Current
+		require
+			identifier_doesnt_have_spaces: not(identifer.has("/") ) and (not (identifier.has" "))
+		deferred
+		end
+
+end
+
+# Filename: ./ArchOrientedProgramming/application.e
+note
+	description: "ArchOrientedProgramming application root class"
+	date: "$Date$"
+	revision: "$Revision$"
+
+class
+	APPLICATION
+
+inherit
+	ARGUMENTS_32
+
+create
+	make
+
+feature {NONE} -- Initialization
+
+	make
+			-- Run application.
+		do
+			--| Add your code here
+			print ("Hello Eiffel World!%N")
+		end
+
+end
+
 # Filename: ./ex_cli/application.e
 note
 	description: "ex_cli application root class"
@@ -531,6 +598,58 @@ feature {NONE} -- Initialization
 			print("Awake...%N")
 		end
 
+end
+
+# Filename: ./literate_polymophic_identfiers/http_scheme.e
+
+feature
+    example_grdual_construction:like Current
+            -- This is in example fo how I would use this class it should be used like test case
+        local
+            l_http:HTTP
+            host = "www.example.com"
+            folder = "folder"
+            subfolder = "subfolder"
+            file = "filename.extension"
+            qry = "query_string=value&var2=value"
+            anchor = "a heding in the document"
+        do
+            l_http := {HTTP}:// host / folder / subfolder / file ? qury # anchor
+
+            check
+                scheme_gets_created_statically: l_http /= void
+                scheme_can_get_created_gradually: "http://www.example.com/folder/subfolder/filename?query_string#anchor" = l_http
+                scheme_pretty_prints: "http://www.example.com/folder/subfolder/filename?query_string#anchor" = l_http
+            end
+
+
+            l_http := "http://www.example.com/folder/subfolder/filename?query_string#anchor"
+
+            check
+                an_scheme_can_be_created_by_string: "http://www.example.com/folder/subfolder/filename?query_string#anchor" = l_http
+            end
+
+            check
+                can_we_ask_things_of_the_service: host = l_http.host
+                what_is_the_path: folder = l_http.path
+                what_is_the_file: file = l_http.file
+            end
+        end
+    end
+
+
+# Filename: ./literate_polymophic_identfiers/scheme.e
+deferred class SCHEME
+    creation
+        make
+    feature -- creation
+
+        make alias ":"
+            -- schemes are supposde to be started statically
+            do
+                create Current
+            end
+    feture
 end
 
 # Filename: ./ex_reverse/application.e
