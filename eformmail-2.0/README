@@ -1,0 +1,23 @@
+eformmail is a safe and secure CGI program that can mail the contents
+of an HTML form to a user. It can do so without revealing the identify
+of the recipient on the web page. For example it is not buried in a
+hidden field.
+
+The installation documentation is in (doc/)eformmail.html
+
+
+Features
+
+- Recipient email address is not specified on the web page that uses
+  this program. This prevents spammers from learning that email and
+  exploiting it.
+
+- Program is written such to prevent harvesting of web pages that
+  use this program in order to exploit it.
+
+- Program does not leak any information to the outside world.
+
+- Contents of form can be formatted with XSLT processor.
+
+- Contains silent spam traps to weed out any spam that is being sent
+  through the form.

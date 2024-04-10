@@ -1,0 +1,504 @@
+ <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII" />
+<title>Safe Form Mail Documentation</title>
+<style type="text/css">
+html, body {
+  font-family: sans-serif;
+}
+
+body {
+  width: 40em;
+}
+
+fieldset {
+  padding: 2em;
+  width: 60em;
+}
+
+pre {
+  margin-left: 2em;
+}
+</style>
+</head>
+
+<body>
+<h1>eformmail documentation</h1>
+
+<p>Welcome to eformmail. This program is a secure and safe solution to
+emailing the contents of a form to an email address.</p>
+
+<p>The latest version is always available at: <a
+href="http://www.pobox.com/~berend/eformmail/">http://www.pobox.com/~berend/eformmail/</a>.</p>
+
+<p>Table of Contents:</p>
+<ul>
+<li><a href="#why">Why eformmail?</a></li>
+<li><a href="#why">In a hurry? The quick guide</a></li>
+<li><a href="#email-address-protection">How eformmail protects the
+email address behind your form</a></li>
+<li><a href="#email-spam-protection">How eformmail protects you against spammers</a></li>
+<li><a href="#misuse-protection">How eformmail protects against misuse
+of itself</a></li>
+<li><a href="#main-configuration">Main configuration file</a></li>
+<li><a href="#key-configuration">Key configuration file</a></li>
+<li><a href="#form">The HTML form</a></li>
+<li><a href="#email-message">Example email message</a></li>
+<li><a href="#example-spam-trap">Example of spam trap log message</a></li>
+</ul>
+
+
+<h2 id="why">Why eformmail?</h2>
+
+<p><i>The task</i>: you want the persons who visit your site be able to
+give comments or feedback.</p>
+
+<p><i>The problem</i>: but as soon as you put an email address on your
+web page, email address harvesters wil come and start spamming that
+email address. This turns away many volunteers, because if you put
+their email address on a web page, they will get inundated with
+spam.</p>
+
+<p><i>non-solution</i>: instead of just providing an email address,
+the web page has a nice HTML form. Visitors fill this in and press a
+submit button. No email address shown, right? Not necessarily
+true. Popular programs currently in use, such as <a
+href="http://www.scriptarchive.com/formmail.html">formmail</a>, still
+require the email address to be there. It might not be visible to
+visitors, but automated email harvesters can easily extract it. You
+still have to put the email address on the form as a hidden field. But
+hidden is hidden for visitors, not for programs.</p>
+
+<p><i>solution</i>: eformmail requires no email address whatsoever to
+be present on the form. eformmail is a program which can gather and
+send the contents of any HTML form to an email address. The email
+address is not buried in the form, but remains hidden on the hosting
+server. It will never be revealed in any form to the outside world
+whatsoever.</p>
+
+
+<h2 id="hurry">In a hurry? The quick guide</h2>
+
+<p>You're a seasoned web master? Here the quick guide.</p>
+
+<ol>
+<li>Copy <tt>eformmail.cgi</tt> to your <tt>cgi-bin</tt> directory and
+give it a name that does not include the words "mail" or "spam". Example:
+<pre>
+cp eformmail.cgi /var/www/cgi-bin/do_not_use_this_name.cgi
+</pre>
+Note: certain installations require that your cgi program is owned by
+a certain user.
+</li>
+<li>Copy <tt>main.conf</tt> to
+<tt>/usr/local/etc/do_not_use_this_name/do_not_use_this_name.conf</tt></li>
+<li>Edit this file, follow the comments as a guide.</li>
+<li>Determine what field in your form contains the key. Let's assume
+the name of this field is "name", and the contents is "feedback".</li>
+<li>Copy <tt>key.conf</tt> to
+<tt>/usr/local/etc/do_not_use_this_name/feedback.conf</tt></li>
+<li>Edit this file, follow the comments as a guide.</li>
+<li>Make sure your HTML form contains a field with field name as specified in <tt>main.conf</tt>.</li>
+<li>Make sure the value of this field refers to an existing key configuration file.</li>
+<li>The action attribute of the &lt;form> tag of your HTML form
+contains the filename you gave to <tt>eformail.cgi</tt>.</li>
+<li>The method should be "post".</li>
+</ol>
+
+<p>That's it. <tt>eformmail.cgi</tt> is now fully set up. If there are
+error messages, look in the error log file of your web server. For
+Apache this is usually <tt>/var/log/httpd/errorlog</tt>.</p>
+
+
+<h2 id="email-address-protection">How eformmail protects the email
+address behind your form</h2>
+
+<p>Spam is Internet's biggest problem. If you put an email address on
+a web page, email address harvesters will come and use that email
+address to send spam to. Even if you put that email address in a
+hidden form field. That's no protection at all.</p>
+
+<p>So eformmail does not need an email address in the form. Instead
+you put a key in the form. That key is read and used to lookup the
+email address. The email address resides safe on your server and is
+not accessible to the world.</p>
+
+
+<h2 id="email-spam-protection">How eformmail protects you against spammers</h2>
+
+<p>Individual fields can be validated with special spam trap
+validation. If the field contents matches this, the submission is
+considered to be from a spammer and silently discarded. The spammer is
+not told this happens, so he cannot finetune his delivery method.</p>
+
+<p>The validation is usally very simple. The spammer always tries to
+send a url, something in the form of
+<tt>http://www.viagra-here.com</tt>. Simply checking if an address
+field does not contain a url is usually sufficient to catch all
+spam.</p>
+
+<p>To do this, simply use the spam keyword in <a
+href="#key-configuration">the key configuration file</a>. Example:</p>
+
+<pre>spam address = /http:\/\//</pre>
+
+
+<h2 id="misuse-protection">How eformmail protects against misuse of itself</h2>
+
+<p>Other programs that can mail the contents of a form call themselves
+universal form to email gateways. Spammers did like that. They used it
+as an open relay tool to send email to everyone in the universe</p>
+
+<p>eformmail is secure and safe and cannot be used to mail just
+anyone. It can only be used to the email address that is specified for
+that form.</p>
+
+<p>eformmail can still be misused. Spammers could fill in the form
+with spam information and press the "Submit" button. That is
+unavoidably if the form is open to everyone in the world. Everyone
+includes spammers. But see <a href="#email-spam-protection">how
+spammers can be identified in most cases</a>.</p>
+
+<p>However, eformmail has taken the following precautions that make it
+hard for spammers to detect sites that use eformmail:</p>
+<ol>
+<li>The program name must not contain the word "mail" or "form". This
+will make it hard for spammers to use Google for example to find sites
+that use this tool. Only accidentally will they discover those
+sites. It is just not worthwhile to go looking for them.</li>
+<li>eformmail requires the presence of a key in the form. What field
+in the form is the key, is unknown for the spammer. Just sending
+random form data to eformmail and hope it will be sent to the email
+address behind it, will therefore not work.</li>
+<li>When an error occurs, eformmail does not tell what is wrong. Only
+a general error message is displayed. Detailed information is in the
+log files on the server, but this is never revealed to the entire
+world. So spammers can not learn that a certain program is actually
+eformmail or learn what form field is the key field. This all makes it
+harder to misuse eformmail.</li>
+<li>When a message is caught by the spam trap facility, all indication
+a spammer gets is that the form has been successfully received. No
+indication will be given that the message was rejected. As the spammer
+think shis submission is successful, he will not attempt to finetune
+his message to try to get it past the spam trap.</li>
+<li>eformmail is still open to Denial of Service attacks: someone
+sending a barrage of email through eformmail. Currently eformmail has
+no protection against this kind of attack. Note that webservers can
+usually block sites by ip address or name, so if you detect such an
+attack you can simply deny that site access.</li>
+</ol>
+
+
+
+<h2 id="main-configuration">Main configuration file</h2>
+<p>The main configuration file is equal to the name of the program
+plus the <tt>.conf</tt> extension. So if you have named the program
+<tt>save_it</tt>, the configuration file is <tt>save_it.conf</tt>. The
+program looks for this configuration file in the following
+directories, in this order:</p>
+<ol>
+<li>In the current directory.</li>
+<li>In <tt>/usr/local/etc/save_it/</tt>. The program name is appended
+to <tt>/usr/local/etc/</tt>. This subdirectory should exist and
+contain the file <tt>save_it.conf</tt>.</li>
+<li>In <tt>/etc/save_it/</tt> and the file should also be called
+<tt>save_it.conf</tt>.</li>
+</ol>
+
+<p>The configuration file contains the following pieces of information:</p>
+
+<ol>
+<li>the name of the field that is the key field in the form data that
+it receives. The program uses this key field to look for the key
+specific configuration file.<br/>
+The key field may be any field in your form, hidden or revealed. By
+having the key field in a configuration file is is harder for
+harvesters to find and misuse web pages that use this program.<br/>
+The key itself should conform to the rules for field names in a
+form. Usually the key is put as a hidden field in the form.</li>
+<li>The page to redirect browers to when the key field is not
+present.<br/> If the key field is not present, this indicates an error
+in creating the form or an attempt by spammers to misuse
+eformmail.<br/> The page to redirect to should be as general as
+possible and certainly not tell what field is the key field as
+spammers can use that information.
+</li>
+<li>Optionally you can specify the location of the sendmail binary. If
+you don't specify it, eformmail will look for it in certain well-known
+locations.</li>
+</ol>
+
+
+<p>An example configuration file is:</p>
+
+<pre>
+# Main configuration file for eformmail.
+
+# The "key field name" should list the field name in the form that
+# contains the key. The value of this field is used to lookup another
+# configuration file which contains the email address.
+# eformmail will redirect the user to the "error redirect" page if this
+# key does not exist in the passed form data.
+
+key field name = key
+
+
+# The page to redirect browsers to when the key field was not present.
+# If the key field is not present, this indicates an error in creating
+# the form or an attempt by spammers to misuse eformmail.
+# The page to redirect to should be as general as possible and
+# certainly not tell what field is the key field as spammers can use
+# that information.
+# The contents of this field must be a full URL, a partial reference
+# will not work.
+
+error redirect = http://localhost/main_error.html
+
+
+# Optionally can specify the location of sendmail (or a clone like
+# postfix).
+# If no location is specified, eformmail will try to find sendmail in
+# certain well-known paths.
+#
+# The -i and -t parameters are required for sendmail!
+
+#sendmail = /usr/sbin/sendmail -i -t
+</pre>
+
+
+<h2 id="key-configuration">Key configuration file</h2>
+
+<p>Every form must contain a key. What field constitues the key field
+is in the main configuration file. When the key is found in the form,
+eformmail looks for another configuration file. The name of that file
+is the value of the key field plus the extension
+<tt>.conf</tt>. eformmail looks for that file in the same directory
+where the main configuration file is found.</p>
+
+<p>Assume that the key is <tt>name</tt> and assume that the contents
+of this form field is "info". eformmail will look for a configuration
+file of the name <tt>info.conf</tt>.</p>
+
+<p>Because eformmail uses the content of the key field to create a
+file name, the contents of the key field should consist of characters
+that make a valid file name. Else you won't be able to create that
+configuration file. Spaces and such are fine, but if the contents of
+the key field could be something like "<tt>this | is > not &lt; a good
+filename</tt>", choose another key.</p>
+
+<p>The key configuration file contains the following items:</p>
+<ol>
+<li>Where to get the values for the required email header fields:
+  <ul>
+    <li>The email address(es) that should receive the form data.</li>
+    <li>The form field that contains the email address of the user who
+    filled in the form or else a default email address.</li>
+    <li>The form field that contains the subject or else a default
+    subject.</li>
+    <li>If the subject must be prepended with some text to make it easier for humans to recognize it.</li>
+  </ul>
+</li>
+<li>Where to redirect upon successful send.</li>
+<li>Where to redirect upon unsuccessful send.</li>
+<li>If and how the message must be formatted. The message is marked up
+  as XML, so the usual candidate to process this would be an XSLT
+  processor.</li>
+<li>A list of zero or more fields which should be validated. The
+contents of the fields in the form must conform to the regular
+expression that is specified.<br/> Any regular expression can be
+specified between the '/' characters. Precoded regular expressions can
+be specified by a name like 'email' which will validate the contents
+of the field against an email address.</li>
+<li>A list of zero or more fields which should be checked for spam
+contents. If a field contents matches this, the form submission is
+silently discard.</li>
+</ol>
+
+<pre>
+# Key configuration file for eformmail.
+
+# Where must contents of form be sent to?
+# Contents of this field is copied straight to the To field of the email.
+# This is a required field.
+
+to = email@somehost.net
+
+
+# In case the form contains a field where users can supply an email
+# address, list that field here.
+# The contents of that field will be used in the From field of the email.
+
+from field name = from
+
+
+# In case users don't have to supply an email address or when the
+# email address is empty, use the contents of this field for the From
+# header field of the email.
+# This is a required field.
+
+from = feedback@localhost
+
+
+# In case the form contains a field which can be used as the subject
+# of the email message, list that field here.
+# The contents of that field will be used in the Subject field of the email.
+
+subject field name = subject
+
+
+# If subject prefix is set, it is prepended to the subject.
+# This helps to identify messages send by eformmail.
+
+subject prefix = [feedback]
+
+
+# In case the form does not contain a subject, or if the subject is
+# left empty, the contents of the following field is used in the
+# Subject field of the email.
+# This is a required field.
+
+subject = (No Subject)
+
+
+# Transformation of the body. Input is XML, so the transformation is
+# probably an XSLT processor. The current directory is the eformmail
+# directory, so style sheets do not have to be prefixed with the full
+# path.
+# It is considered an error if the program exits with any error code
+# then 0.
+
+#transform = /usr/local/bin/Xalan - test.xsl
+
+
+# Form fields can be validated as well.
+# A validation line is of the form:
+# validate [field name] = type | /regular-expression/
+#
+# Recognized types are: double, email, integer, nonNegativeInteger, url
+#
+# Examples:
+#   validate from = email
+#
+# Or
+#
+#   validate number = /[0-9]+/
+#
+
+validate from = email
+
+#validate subject = /.+/
+
+
+# Spam protection: any submission where a field matches the provided
+# regular expression, will be silently ignored. The spammer will be
+# given no indication that his submission has appeared in a black
+# hole.
+
+spam subject = /http:\/\//
+
+
+# If sending the email was successful, the user is redirect to this page.
+# The contents of this field must be a full URL, a partial reference
+# will not work.
+
+success redirect = http://localhost/success.html
+
+
+# If any other error occurs (for example the email could not be sent)
+# the user is redirect to this page.
+# The contents of this field must be a full URL, a partial reference
+# will not work.
+
+error redirect = http://localhost/key_error.html
+</pre>
+
+
+<h2 id="form">The HTML form</h2>
+
+<p>If all has been setup, you can adapt or create an HTML form. The
+action of the form should refer to the location of your
+<tt>eformmail.cgi</tt> program. The method should be "post". Both the
+application/x-www-form-urlencoded and multipart/form-data encodings are
+supported. <tt>eformmail.cgi</tt> shouldn't be used yet to email
+binary files. They probably have to be sent as attachments to the
+email. This is scheduled for a future release.</p>
+
+<pre>
+&lt;html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+&lt;head>
+&lt;title>Test form&lt;/title>
+&lt;/head>
+
+&lt;body>
+&lt;h1>Example form&lt;/h1>
+&lt;form method="post" action="/cgi-bin/do_not_use_this_name.cgi">
+&lt;p>&lt;input type="hidden" name="key" value="berend"/>
+&lt;label for="from">From: &lt;/label>&lt;input name="from"/>&lt;/p>
+&lt;p>&lt;label for="subject">Subject: &lt;/label>&lt;input name="subject"/>&lt;/p>
+&lt;p>&lt;label for="subject">Message: &lt;/label>&lt;textarea name="body" rows="10" cols="60"/>&lt;/p>
+&lt;p>&lt;button name="Submit">Submit&lt;/button>&lt;/p>
+&lt;/form>
+&lt;/body>
+&lt;/html>
+</pre>
+
+<p>It will look like this:</p>
+
+<fieldset>
+<legend>Example form</legend>
+<form method="post" action="/cgi-bin/do_not_use_this_name.cgi">
+<p><input type="hidden" name="key" value="berend"/>
+<label for="from">From: </label><input name="from"/></p>
+<p><label for="subject">Subject: </label><input name="subject"/></p>
+<p><label for="subject">Message: </label><textarea name="body" rows="10" cols="60">&nbsp;</textarea></p>
+<p><button name="Submit">Submit</button></p>
+</form>
+</fieldset>
+
+<h2 id="email-message">Example email message</h2>
+
+<p>The email message that is sent, looks like this if no
+transformation is specified:</p>
+
+<pre>
+Date: Tue, 06 Apr 2004 09:46:45 +1200
+Message-Id: &lt;1081201605.16603.1@somewhere.com>
+To: feedback@localhost
+From: berend@pobox.com
+Subject: [feedback] A test
+X-Mailer: eformmail 0.3
+MIME-Version: 1.0
+Content-Length: 82
+
+key: berend
+from: berend@pobox.com
+subject: Error on your web page
+body: Could you please fix this?
+Submit:
+</pre>
+
+
+<h2 id="example-spam-trap">Example of spam trap log message</h2>
+
+<p>This is the message that ends up in your log when a submission by a spammer is detected:</p>
+
+<pre>
+[Mon May 07 12:41:45 2007] [error] [client 127.0.0.1]
+  Rejected form submission that looked like spam.,
+  referer: http://localhost/eformmail.cgi
+</pre>
+
+
+<h2>That's it</h2>
+
+<p>That's all there is to setting up eformmail. I hope this program
+will be useful to you.</p>
+
+
+</body>
+
+</html>

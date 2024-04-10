@@ -1,0 +1,28 @@
+NEWS - list of user-visible changes between releases of eformmail
+
+
+Release 2.0 - 2007-05-07
+
+* Spam trap facility installed, so misuse of form by spammers has
+  become impossible.
+
+* Field names are now treated case-insensitively.
+
+
+Release 1.0 - 2007-03-02
+
+* Can now send email using SMTP, so sendmail does no longer need to be
+  installed.
+* The email address to which the email is sent, is no longer
+  included in the To field. This avoids harvesting of this email
+  address by programs that scan address books or email.
+* Non zero exit codes by sendmail are now treated as an error.
+
+
+Release 0.3 - 2006-05-30
+
+* Fixed issue with only first part of error appearing in Apache's weblog.
+
+
+Release 0.2 - 2004-03-27
+* Initial release

@@ -1,0 +1,53 @@
+2007-05-07  Berend de Boer  <berend@pobox.com>
+
+	* Field names are now treated in case-insensitive manner.
+
+
+2007-04-28  Berend de Boer  <berend@pobox.com>
+
+	* Spam trap added: when a given field matches a certain regular
+	expression, the submission is considered spam and silently
+	ignored. No indication of this happening is given to the spammer.
+
+	* Strip leading and trailing space from submissions.
+
+
+2007-03-15  Berend de Boer  <berend@pobox.com>
+
+	* SMTP mail was sent from address postmaster which wasn't always
+	accepted. It now uses the from address.
+
+
+2007-03-02  Berend de Boer  <berend@pobox.com>
+
+	* release 1.0.
+
+	* The email address to which the email is sent, is no longer
+	  included in the To field. This avoids harvesting of this email
+	  address by programs that scan address books or email.
+
+	* Added support for sending email using SMTP.
+
+
+2007-02-23  Berend de Boer  <berend@pobox.com>
+
+	* Non zero exit codes by sendmail are now treated as an error.
+
+	* Fixed compile issue with new eposix.
+
+
+2006-05-30  Berend de Boer  <berend@pobox.com>
+
+	* Errors are now written to the log as a single string, else
+	Apache seems to notice only the first part.
+
+
+2004-04-06  Berend de Boer  <berend@pobox.com>
+
+	* When transform isn't set, the body of the email is no longer
+	XML, but just plain text. Easier for humans to handle.
+
+
+2004-03-18  Berend de Boer  <berend@dellius.nederware.nl>
+
+	* Start to write a secure CGI program that mails form data.
