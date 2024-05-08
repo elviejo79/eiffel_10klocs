@@ -1250,6 +1250,565 @@ feature {NONE} -- Implementation
 
 end
 
+# Filename: ./AOPinEiffel/mediator.e
+<!--@+leo-ver=5-thin-->
+<!--@+node:agarciafdz.20240507230057.1: * @file mediator.e-->
+<!--@+all-->
+<!--@+node:agarciafdz.20240507192925.1: ** <<MEDIATOR_LIBRARY>>-->
+class 
+    MEDIATOR[C -> COLLEAGUE]
+create
+    make
+
+feature
+    make
+        do
+            create colleages.make
+        end
+
+feature
+    colleagues: LINKED_LIST[C]
+
+feature
+    extend (a_colleague:C)
+        -- extend colleagues
+        -- update event subscription of colleagues
+        require
+            a_collegue_exists: attached a_colleague
+            not_already_in_list: not colleagues.has(a_colleague)
+        local
+            other_colleague, new_colleague : COLLEAGUE
+            a_cursor: CURSOR
+        do
+            new_colleague := a_colleague
+            a_cursor := colleagues.cursor
+            --subscribe existing colleagues 
+            -- to a_colleague.do_something
+            -- Subscribe a_colleague to other colleagues event.
+            from colleagues.start until colleages.after loop
+                other_colleague := colleagues.item
+                other_colleague.event.subscribe(
+                    agent other_colleague.do_something)
+                colleages.forth
+            end
+            
+            -- Add a_colleague to a list of colleages
+            
+            colleages.extend(a_colleage)
+            colleages.go_to(a_cursor)
+        ensure
+            one_more: colleagues.count = old colleages.count+1
+            is_last: colleagues.last = a_colleague
+            subscribed: colleages.for_all(agent is_colleague_subscribed)
+
+feature
+    remove(a_colleague:C)
+        require
+            exists: attached a_colleague
+            is_in_the_set: colleagues.has(a_colleague)
+        local
+            a_cursor:CURSOR
+            old_colleague, other_colleague: COLLEAGUE
+        do
+            a_cursor := colleagues.cursor
+            -- Unsubscribe remaining colleagues
+            -- from a_college.do_something
+            -- Unsubscribe events from a_colleague.
+            -- Remove a_colleague from colleagues
+            
+            old_collegue := a_colleague
+            from colleages.start until colleagues.after loop
+                other_colleague := colleages.item
+                if other_colleague = a_colleague then
+                    colleages.remove
+                else
+                    other_colleague.event.unsubscribe(
+                        agent old_colleage.do_something)
+                    old_colleage.event.unsubscribe(
+                        agent other_colleague.do_something)
+                    colleagues.forth
+                end
+            end
+            collegues.go_to(a_cursor)
+        ensure
+            one_less: colleagues.count = old colleagues.count-1
+            not_has_colleague: not colleages.has(a_colleague)
+            unsubscribed: a_colleague.unsubscribed
+        end
+
+feature
+    is_collegue_subscribed(a_collegue:C):BOOLEAN
+    require
+        a_colleage_exists: attached a_colleague
+    do
+        Result := a_colleague.subscribed
+    ensure
+        definition: Result = a_colleague.subscribed
+    end
+    
+    is_colleague_unsubscribed(a_colleague:C):BOOLEAN
+        require
+            a_colleage_not_void: attached a_colleague
+        do
+            Restult := a_college.unsubscribed
+        ensure
+            definition: Result = a_collegue.unsubscribed
+        end
+invariant
+    has_colleagues: attached colleages
+    college_exist: not colleages.has(void)
+end
+<!--@-all-->
+<!--@-leo-->
+
+# Filename: ./AOPinEiffel/connector.e
+--@+leo-ver=5-thin
+--@+node:agarciafdz.20240413144210.1: * @file ./connector.e
+class Connector 
+    inherit
+        SUBJECT
+    
+    feature attach alias "->"(o:OBSERVER)
+        do
+            predecesor
+        end
+--@-leo
+
+# Filename: ./AOPinEiffel/connecting.e
+--@+leo-ver=5-thin
+--@+node:agarciafdz.20240415152433.1: * @file ./connecting.e
+note
+    goal: It creates a mechanism on which objects can automatically connect with each others
+    
+class CONNECTABLE
+feature {NONE} 
+    listeners:ACTION_SEQUENCE
+        attribute
+            Result.make
+        end
+
+feature
+    connect, "->" (aListener:PROCEDURE)
+        require
+            not_listening_already: subscriber ∉ subscribers
+        do
+            listeners.extend(listener)
+        ensure
+            subscribed: subscriber ∈ subscribers
+        end
+
+    feature notify(data:EVENT_DATA)
+    do
+        listeners.call(data)
+    end
+    
+end
+    
+--@-leo
+
+# Filename: ./AOPinEiffel/connectable.e
+--@+leo-ver=5-thin
+--@+node:agarciafdz.20240415152433.1: * @file ./connectable.e
+note
+    goal: It creates a mechanism on which objects can automatically connect with each others
+    
+class CONNECTABLE
+feature {NONE} 
+    listeners:ACTION_SEQUENCE
+        attribute
+            Result.make
+        end
+
+feature
+    connect, "->" (aListener:PROCEDURE)
+        require
+            not_listening_already: subscriber ∉ subscribers
+        do
+            listeners.extend(listener)
+        ensure
+            subscribed: subscriber ∈ subscribers
+        end
+
+    feature notify(data:EVENT_DATA)
+    do
+        listeners.call(data)
+    end
+    
+end
+    
+--@-leo
+
+# Filename: ./AOPinEiffel/AOP/conceptorienteddesign/concept.e
+note
+	description: "Summary description for {CONCEPT}."
+	author: ""
+	date: "$Date$"
+	revision: "$Revision$"
+
+deferred class
+	CONCEPT
+
+
+end
+
+# Filename: ./AOPinEiffel/AOP/conceptorienteddesign/yellkey.e
+note
+	purpose: "see description"
+	description: "shorten URLs to common words"
+    principle: "[
+     after registering a URL u for t seconds
+  	 and obtaining a shortening s, looking up s
+  	 will yield u until the shortening expires
+  	 t seconds from now:
+  	 register (u, t, s); lookup (u, s') {s' = s}
+    ]"
+
+class
+	YELLKEY
+inherit
+	HASH_TABLE[STRING, STRUCT[expires: INTEGER, original_url: STRING ]]
+
+feature --principle
+	principle_as_test {TEST}
+			-- after registering a URL u for t seconds
+	  	 	-- and obtaining a shortening s, looking up s
+	  	 	-- will yield u until the shortening expires
+	  		-- t seconds from now:
+	  	 	-- register (u, t, s); lookup (u, s') {s' = s}
+		local
+			url:URL := "http://www.example.com"
+			time_to_live:SECONDS := 10
+		do
+
+			short_url := register(url,time_to_live)
+			check
+				short_url_must_resolve_to_original_url: lookup(shortened) ~ url
+				print("violates the invariant of a url shortening service")
+			end
+
+			--when the url_expires
+			sleep(time_to_live+1)
+			loookup(short_url)
+			check
+				expires_in_time: lookup(short_url) = Expired
+			end
+			ensure
+				principle_is_part_of_the_class_not_instance: class
+		end
+	
+feature --actions
+
+	register(u:URL, t:SECONDS):URL
+		require
+			url_not_stored: not exists stored_url: item | stored_url.original = u
+		do
+			put(shortFor(u) ,[expiry, 	u])
+		ensure
+			url_retrivable: has(shortFor(u))
+		end
+
+	lookup(s:URL):URLorVoid
+		require
+			list_not_empty: list.count > 0
+		do
+			found := list.lookup(u)
+			if attached found then
+				if now < found.expiration then
+					Result := found.original
+				else
+					Result := Void
+				end
+			end
+		ensure else
+			if_found_then_is_active: attached found implies now < found.expiration and Result.url = found.url
+			-- How can I write that it was found but expired.
+			if_not_found_then_empty: not(attached found) implies Result = void
+		end
+
+	prune_expired
+		-- eliminate the stored links that have expired
+		-- this is a system method, meaning it is called by the system
+		-- not the user, every x minutes.
+		do
+			across items as shortUrl, url | if url.caducity < now then remove(shortUrl)
+		end
+
+
+feature -- convenience
+
+	shortFor(u:URL):URL
+	do
+		Result := u
+	end
+
+	expiration_date(t:INTEGER):INTEGER
+	do
+		Result := now + t
+	end
+
+
+note
+	author: "Alejandro Garcia by Translating David Jacksons article here: "
+	date: "$Date$"
+	revision: "$Revision$"
+end
+
+# Filename: ./AOPinEiffel/AOP/action_cell.e
+--@+leo-ver=5-thin
+--@+node:agarciafdz.20240415234913.1: * @file action_cell.e
+--@@language eiffel
+note
+	description: "Summary description for {ACTION_CELL}."
+	author: ""
+	date: "$Date$"
+	revision: "$Revision$"
+
+--@+<<action_cell_declaration>>
+--@+node:agarciafdz.20240415235024.1: ** <<action_cell_declaration>>
+class
+	ACTION_CELL [G]
+
+inherit
+	CELL [G]
+		redefine
+			put
+		end
+	CONNECTABLE [G]
+--@-<<action_cell_declaration>>
+
+create
+	put
+
+feature --accesors
+
+--@+<<put_updated>>
+--@+node:agarciafdz.20240416000028.1: ** <<put_updated>>
+	put (v: G)
+		-- update value and notify listeners
+		do
+			Precursor (v)
+			tell_listeners (v)
+		end
+--@-<<put_updated>>
+
+end
+--@-leo
+
+# Filename: ./AOPinEiffel/AOP/connectable.e
+--@+leo-ver=5-thin
+--@+node:agarciafdz.20240415152433.1: * @file connectable.e
+--@@language eiffel
+--@verbatim
+--@+leo-ver=5-thin
+--@verbatim
+--@+node:agarciafdz.20240415152433.1: * @file connectable.e
+note
+	goal: "It creates a mechanism on which objects can automatically connect with each other"
+
+deferred class CONNECTABLE [EVENT_DATA]
+
+
+--@+<<what_is_to_connect>>
+--@+node:agarciafdz.20240416000809.1: ** <<what_is_to_connect>>
+feature
+	connect(aListener: PROCEDURE [EVENT_DATA])
+		require
+			not_listening_already: not listeners.has (aListener)
+		do
+			listeners.extend (aListener)
+		ensure
+			ready_to_listen: listeners.has (aListener)
+		end
+--@-<<what_is_to_connect>>
+
+--@+<<collection_of_listeners>>
+--@+node:agarciafdz.20240416001143.1: ** <<collection_of_listeners>>
+feature --collection of listeners
+	listeners: ACTION_SEQUENCE [EVENT_DATA]
+		attribute
+			create Result.default_create
+		end
+--@-<<collection_of_listeners>>
+
+--@+<<tell_listeners>>
+--@+node:agarciafdz.20240416002014.1: ** <<tell_listeners>>
+feature
+    -- after upadating tell listeners
+    tell_listeners (data: EVENT_DATA)
+		do
+			listeners.call (data)
+		end
+--@-<<tell_listeners>>
+
+end
+
+--@verbatim
+--@-leo
+--@-leo
+
+# Filename: ./AOPinEiffel/AOP/application.e
+note
+	description: "AOP application root class"
+	date: "$Date$"
+	revision: "$Revision$"
+
+class
+	APPLICATION
+
+inherit
+	ARGUMENTS_32
+
+create
+	make
+
+feature {NONE} -- Initialization
+
+	make
+		local
+			my_cell: ACTION_CELL [STRING]
+			-- Run application.
+		do
+				--| Add your code here
+			print ("Hello 2 Eiffel World!%N")
+			print ("anthoer 3 lie!%N")
+			create my_cell.put ("one")
+			my_cell.connect (agent my_print)
+			my_cell.put ("two")
+			my_cell.put ("three")
+			my_cell.connect (agent my_2nd_print)
+			my_cell.put ("four")
+		end
+
+	my_print (s: STRING)
+		do
+			print ("first subscriber: ")
+			print (s)
+			print ("%N")
+		end
+
+	my_2nd_print (s: STRING)
+		do
+			print ("2nd print:")
+			print (s)
+			print ("%N")
+		end
+
+end
+
+# Filename: ./AOPinEiffel/AOP/event_type.e
+note
+	description: "Trying to mimic the contents of the paper about Events."
+	author: ""
+	date: "$Date$"
+	revision: "$Revision$"
+
+class EVENT_HANDLERS[EVENT_DATA -> detachable TUPLE create default_create end ]
+	inherit ACTION_SEQUENCE [EVENT_DATA]
+
+
+
+end
+
+# Filename: ./AOPinEiffel/AOP/tests/new_test_set2.e
+--@+leo-ver=5-thin
+--@+node:agarciafdz.20240415232400.1: * @file new_test_set2.e
+--@@language eiffel
+note
+	description: "[
+			Eiffel tests that can be executed by testing tool.
+		]"
+	author: "EiffelStudio test wizard"
+	date: "$Date$"
+	revision: "$Revision$"
+	testing: "type/manual"
+
+class
+	NEW_TEST_SET2
+
+inherit
+	EQA_TEST_SET
+
+feature -- Test routines
+
+--@+<<a_connect_b>>
+--@+node:agarciafdz.20240415233859.1: ** <<a_connect_b>>
+	TEST_ACTION_CELL
+			-- can connect and remain in sync
+		local
+			Alice, Bob: ACTION_CELL [STRING]
+		do
+			create Alice.put ("")
+			create Bob.put ("")
+
+			Alice.connect (agent Bob.put)
+			Alice.put ("1st text")
+
+			assert ("bob got updated with ilecs value", Bob.item ~ Alice.item)
+
+			Alice.put ("2nd text")
+			assert ("they remain in sync", Bob.item ~ Alice.item)
+		end
+--@-<<a_connect_b>>
+
+end
+--@-leo
+
+# Filename: ./AOPinEiffel/mediator_pattern/colleague.e
+<!--@+leo-ver=5-thin-->
+<!--@+node:agarciafdz.20240507230016.1: * @file colleague.e-->
+<!--@+all-->
+<!--@+node:agarciafdz.20240507225203.1: ** <<MEDIATOR_LIBRARY_COLLEAGUE>>-->
+deferred class
+    COLLEAGUE
+feature
+    make(a_mediator: like mediator)
+        -- Set mediator to a_mediator
+        require
+            a_mediator_not_void: attached a_mediator
+        do
+            mediator := a_mediator
+            create event
+        ensure
+            mediator_set: mediator = a_mediator
+        end
+        
+    mediator: MEDIATOR[COLLEAGE]
+    event: EVENT_TYPE[TUPLE]
+
+feature
+    subscribed: BOOLEAN
+        -- Is current subscribed to other colleages event?
+        deferred
+        end
+        
+    unsubscribed: BOOLEAN
+        deferred
+        end
+
+feature
+    change
+        -- Do something that changes current colleagues state.
+        do
+            do_change
+            event.publish([])
+        end
+    
+    do_something
+        deferred
+        end
+
+feature
+    do_change
+        deferred
+        end
+
+invariant
+    mediator_not_void: attached mediator
+    event_not_void: attached event
+    
+<!--@-all-->
+<!--@-leo-->
+
 # Filename: ./ex_cli/application.e
 note
 	description: "ex_cli application root class"
